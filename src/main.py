@@ -1,0 +1,1 @@
+print("Hello autonomous world!")
