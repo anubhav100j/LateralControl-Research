@@ -2,22 +2,30 @@ import gymnasium as gym
 import highway_env    # registers the environments
 
 def main():
-    # Step 1: create env with render_mode only
     env = gym.make("highway-v0", render_mode="human")
-    # Step 2: configure the underlying env
     env.unwrapped.configure({
-        "duration": 1000,
+        "vehicles_count": 1,
+        "controlled_vehicles": 1,
+        "duration": 100,
         "offroad_terminal": False,
         "collision_reward": 0.0
     })
 
+    # 1) Inspect the dict of actions
+    actions = env.unwrapped.action_type.actions
+    print("Action mapping:", actions)
+
+    # 2) Find the integer code for "IDLE" (keep lane)
+    lane_keep = next(k for k, v in actions.items() if v == "IDLE")
+    print("Using action code", lane_keep, "for IDLE")
+
     obs, info = env.reset()
-    for _ in range(1000):
-        action = env.action_space.sample()
-        obs, reward, terminated, truncated, info = env.step(action)
+    for step in range(100):
+        obs, reward, terminated, truncated, info = env.step(lane_keep)
         env.render()
+        print(f"Step {step:3d} term={terminated}, trunc={truncated}")
         if terminated or truncated:
-            obs, info = env.reset()
+            break
 
     env.close()
 
